@@ -1,13 +1,275 @@
 <!DOCTYPE html>
-<html lang="">
-  <head>
+<html lang="es">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>📅</text></svg>">
     <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vite App</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+    <title>EventSphere - Descubre Eventos Increíbles</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar-eventsphere fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <a href="index.html" class="logo">EventSphere</a>
+                <div class="flex items-center space-x-4" id="navbarMenu">
+                    <a href="eventos.html">Eventos</a>
+                    <a href="crear-evento.html">Crear Evento</a>
+                    <a href="mi-perfil.html">Mi Perfil</a>
+                    <a href="login.html">Iniciar Sesión</a>
+                    <button class="btn-registrar">Registrarse</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="pt-16">
+        <div class="hero-eventsphere">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="icon-sparkles">✨</span>
+                    EventSphere
+                </h1>
+                <p class="hero-subtitle">Descubre, conecta y vive experiencias inolvidables</p>
+                
+                <!-- Botones principales -->
+                <div class="hero-buttons">
+                    <button class="btn-hero-primary" onclick="window.location.href='register.html'">
+                        👤 Únete Gratis
+                    </button>
+                    <button class="btn-hero-secondary" onclick="window.location.href='login.html'">
+                        🎯 Iniciar Sesión
+                    </button>
+                </div>
+
+                <!-- Pills de categorías -->
+                <div class="category-pills">
+                    <button class="category-pill">🎵 Conciertos</button>
+                    <button class="category-pill">⚽ Deportes</button>
+                    <button class="category-pill">🎤 Conferencias</button>
+                    <button class="category-pill">🎨 Arte</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de búsqueda -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="search-section">
+            <div class="search-title">
+                🔍 Explora eventos destacados
+            </div>
+            
+            <div class="search-controls">
+                <input type="text" placeholder="¿Qué evento buscas?" class="w-full">
+                <select class="w-full md:w-auto">
+                    <option>Todas las categorías</option>
+                    <option>Conciertos</option>
+                    <option>Deportes</option>
+                    <option>Conferencias</option>
+                    <option>Arte</option>
+                </select>
+                <select class="w-full md:w-auto">
+                    <option>Ordenar por fecha</option>
+                    <option>Más recientes</option>
+                    <option>Precio bajo</option>
+                    <option>Precio alto</option>
+                </select>
+            </div>
+
+            <!-- Filtros Activos/Todos -->
+            <div class="filter-tabs">
+                <button class="filter-tab active">⭕ Activos</button>
+                <button class="filter-tab">📋 Todos</button>
+                <button class="filter-tab" style="margin-left: auto; background: transparent; border: none; color: #64748b;">
+                    🗑️ Limpiar filtros
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección ¿Por qué unirte? -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">
+                🎁 ¿Por qué unirte a EventSphere?
+            </h2>
+            <p class="text-xl text-gray-600">
+                Crea tu cuenta gratis y desbloquea todas las funciones
+            </p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎫</div>
+                <h3 class="feature-title">Compra Boletos</h3>
+                <p class="feature-description">
+                    Accede a eventos exclusivos con tickets digitales y códigos QR
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">➕</div>
+                <h3 class="feature-title">Crea Eventos</h3>
+                <p class="feature-description">
+                    Organiza tus propios eventos y gestiona asistentes fácilmente
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3 class="feature-title">Interactúa</h3>
+                <p class="feature-description">
+                    Chatea con otros asistentes y comparte fotos de los eventos
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3 class="feature-title">Valida Entradas</h3>
+                <p class="feature-description">
+                    Escanea códigos QR en tiempo real para validar asistencia
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Eventos Destacados -->
+    <div class="bg-gray-100 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 class="text-3xl font-bold text-gray-800 mb-8 text-center">
+                ⭐ Eventos Destacados
+            </h3>
+            <div id="eventos-destacados" class="eventos-grid">
+                <p class="text-center text-gray-500 col-span-full">Cargando eventos...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-eventsphere">
+        <div class="max-w-7xl mx-auto">
+            <p class="footer-title">EventSphere 2025</p>
+            <p class="footer-subtitle">Transformando eventos en experiencias colaborativas</p>
+        </div>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script>
+        // Verificar si hay sesión activa y actualizar navbar
+        const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+        const navbarMenu = document.getElementById('navbarMenu');
+
+        if (usuario && usuario.id) {
+            navbarMenu.innerHTML = `
+                <a href="eventos.html">Eventos</a>
+                <a href="mis-boletos.html">Mis Boletos</a>
+                <a href="crear-evento.html">Crear Evento</a>
+                <a href="mi-perfil.html">Mi Perfil</a>
+                <button onclick="cerrarSesion()" style="background: #ef4444; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600;">
+                    Cerrar Sesión
+                </button>
+            `;
+        } else {
+            navbarMenu.innerHTML = `
+                <a href="eventos.html">Eventos</a>
+                <a href="crear-evento.html">Crear Evento</a>
+                <a href="mi-perfil.html">Mi Perfil</a>
+                <a href="login.html">Iniciar Sesión</a>
+                <a href="register.html" class="btn-registrar">Registrarse</a>
+            `;
+        }
+
+        function cerrarSesion() {
+            if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+                localStorage.removeItem('usuario');
+                localStorage.removeItem('token');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Cargar eventos destacados
+        async function cargarEventosDestacados() {
+            try {
+                const response = await fetch(`${API_URL}/eventos/index.php?limit=6`);
+                const data = await response.json();
+
+                const container = document.getElementById('eventos-destacados');
+
+                if (data.success && data.eventos && data.eventos.length > 0) {
+                    container.innerHTML = data.eventos.map(evento => `
+                        <div class="evento-card" onclick="window.location.href='evento-detalle.html?id=${evento.id}'">
+                            <div class="evento-imagen">
+                                ${getCategoryIcon(evento.categoria_id)}
+                            </div>
+                            <div class="evento-contenido">
+                                <h4 class="evento-titulo">${evento.titulo}</h4>
+                                <p class="evento-descripcion">
+                                    ${evento.descripcion ? evento.descripcion.substring(0, 100) + '...' : 'Sin descripción'}
+                                </p>
+                                <div class="evento-footer">
+                                    <span class="evento-precio">$${evento.precio}</span>
+                                    <span class="evento-fecha">
+                                        ${new Date(evento.fecha_evento).toLocaleDateString('es-ES', { 
+                                            day: 'numeric', 
+                                            month: 'short',
+                                            year: 'numeric'
+                                        })}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <div class="text-6xl mb-4">📭</div>
+                            <p class="text-xl text-gray-600 mb-6">No hay eventos disponibles por el momento</p>
+                            <a href="crear-evento.html" class="btn-hero-primary" style="display: inline-flex;">
+                                Crear el Primer Evento
+                            </a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error al cargar eventos:', error);
+                document.getElementById('eventos-destacados').innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-6xl mb-4">⚠️</div>
+                        <p class="text-xl text-red-600">Error al cargar eventos. Por favor, intenta de nuevo.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function getCategoryIcon(categoriaId) {
+            const icons = {
+                1: '🎸',
+                2: '🎤',
+                3: '🏆',
+                4: '🛠️',
+                5: '🎉',
+                6: '🍕'
+            };
+            return icons[categoriaId] || '🎭';
+        }
+
+        // Cargar eventos al cargar la página
+        cargarEventosDestacados();
+
+        // Funcionalidad de filtros
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                if (!this.textContent.includes('Limpiar')) {
+                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
 </html>

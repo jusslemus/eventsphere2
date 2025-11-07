@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>📅</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Evento - EventSphere</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 50%, #4a7bb7 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(74, 144, 226, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(94, 114, 228, 0.3) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .container-form {
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-card h1 {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .form-label {
+            color: #1e3a5f;
+            font-weight: 600;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            background: rgba(248, 250, 252, 0.8);
+            border: 2px solid rgba(30, 58, 95, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #2d5a8f;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(45, 90, 143, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            box-shadow: 0 4px 15px rgba(30, 58, 95, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 58, 95, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(30, 58, 95, 0.1);
+            color: #1e3a5f;
+            border: 2px solid rgba(30, 58, 95, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(30, 58, 95, 0.15);
+            border-color: rgba(30, 58, 95, 0.3);
+        }
+
+        .alert-error {
+            background: rgba(254, 226, 226, 0.9);
+            border: 2px solid #ef4444;
+            color: #991b1b;
+            backdrop-filter: blur(10px);
+        }
+
+        .alert-success {
+            background: rgba(209, 250, 229, 0.9);
+            border: 2px solid #10b981;
+            color: #065f46;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-link {
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #1e3a5f;
+        }
+
+        .nav-link.active {
+            color: #1e3a5f;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            color: #dc2626;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            color: #991b1b;
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        input[type="file"] {
+            cursor: pointer;
+        }
+
+        input[type="file"]::file-selector-button {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+        }
+
+        /* Animación de entrada */
+        .form-card {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold logo">EventSphere</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="eventos.html" class="nav-link">Explorar</a>
+                    <a href="mis-boletos.html" class="nav-link">Mis Boletos</a>
+                    <button id="btn-logout" class="logout-btn">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Formulario Crear Evento -->
+    <div class="max-w-4xl mx-auto px-4 py-12 container-form">
+        <div class="form-card p-8">
+            <h1 class="text-3xl font-bold mb-8">Crear Nuevo Evento</h1>
+
+            <form id="form-crear-evento" enctype="multipart/form-data" class="space-y-6">
+                <!-- Título -->
+                <div>
+                    <label class="block form-label mb-2">Título del Evento *</label>
+                    <input type="text" id="titulo" required maxlength="200"
+                           class="form-input w-full px-4 py-3 rounded-lg"
+                           placeholder="Festival de Rock 2025">
+                </div>
+
+                <!-- Descripción -->
+                <div>
+                    <label class="block form-label mb-2">Descripción *</label>
+                    <textarea id="descripcion" required rows="4"
+                              class="form-textarea w-full px-4 py-3 rounded-lg"
+                              placeholder="Describe tu evento..."></textarea>
+                </div>
+
+                <!-- Categoría -->
+                <div>
+                    <label class="block form-label mb-2">Categoría *</label>
+                    <select id="categoria" required
+                            class="form-select w-full px-4 py-3 rounded-lg">
+                        <option value="">Selecciona una categoría</option>
+                        <option value="1">🎸 Conciertos</option>
+                        <option value="2">🎤 Conferencias</option>
+                        <option value="3">🏆 Deportes</option>
+                        <option value="4">🛠️ Talleres</option>
+                        <option value="5">🎉 Fiestas</option>
+                        <option value="6">🍕 Gastronómico</option>
+                    </select>
+                </div>
+
+                <!-- Fecha y Hora -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block form-label mb-2">Fecha *</label>
+                        <input type="date" id="fecha" required
+                               class="form-input w-full px-4 py-3 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block form-label mb-2">Hora *</label>
+                        <input type="time" id="hora" required
+                               class="form-input w-full px-4 py-3 rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Ubicación -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block form-label mb-2">Ubicación *</label>
+                        <input type="text" id="ubicacion" required
+                               class="form-input w-full px-4 py-3 rounded-lg"
+                               placeholder="Estadio Nacional">
+                    </div>
+                    <div>
+                        <label class="block form-label mb-2">Dirección</label>
+                        <input type="text" id="direccion"
+                               class="form-input w-full px-4 py-3 rounded-lg"
+                               placeholder="Av. Principal #123">
+                    </div>
+                </div>
+
+                <!-- Capacidad y Precio -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block form-label mb-2">Capacidad Total *</label>
+                        <input type="number" id="capacidad" required min="1"
+                               class="form-input w-full px-4 py-3 rounded-lg"
+                               placeholder="500">
+                    </div>
+                    <div>
+                        <label class="block form-label mb-2">Precio Boleto ($) *</label>
+                        <input type="number" id="precio" required min="0" step="0.01"
+                               class="form-input w-full px-4 py-3 rounded-lg"
+                               placeholder="25.00">
+                    </div>
+                </div>
+
+                <!-- Imagen -->
+                <div>
+                    <label class="block form-label mb-2">Imagen del Evento *</label>
+                    <input type="file" id="imagen" accept="image/*" required
+                           class="form-input w-full px-4 py-3 rounded-lg">
+                    <p class="text-sm text-gray-500 mt-2">Formatos: JPG, PNG. Máximo 2MB</p>
+                </div>
+
+                <!-- Mensajes -->
+                <div id="error-msg" class="hidden alert-error px-4 py-3 rounded-lg"></div>
+                <div id="success-msg" class="hidden alert-success px-4 py-3 rounded-lg"></div>
+
+                <!-- Botones -->
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 btn-primary text-white py-3 rounded-lg font-semibold">
+                        Crear Evento
+                    </button>
+                    <a href="eventos.html" class="flex-1 btn-secondary py-3 rounded-lg font-semibold text-center">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        verificarAuth();
+
+        document.getElementById('form-crear-evento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const errorMsg = document.getElementById('error-msg');
+            const successMsg = document.getElementById('success-msg');
+            errorMsg.classList.add('hidden');
+            successMsg.classList.add('hidden');
+
+            const usuario = getUsuarioActual();
+            if (!usuario) {
+                redirect('login.html');
+                return;
+            }
+
+            const fecha = document.getElementById('fecha').value;
+            const hora = document.getElementById('hora').value;
+            const fechaEvento = `${fecha} ${hora}:00`;
+
+            const formData = new FormData();
+            formData.append('titulo', document.getElementById('titulo').value);
+            formData.append('descripcion', document.getElementById('descripcion').value);
+            formData.append('categoria_id', document.getElementById('categoria').value);
+            formData.append('organizador_id', usuario.id);
+            formData.append('fecha_evento', fechaEvento);
+            formData.append('ubicacion', document.getElementById('ubicacion').value);
+            formData.append('direccion', document.getElementById('direccion').value);
+            formData.append('capacidad_total', document.getElementById('capacidad').value);
+            formData.append('precio_boleto', document.getElementById('precio').value);
+            formData.append('imagen', document.getElementById('imagen').files[0]);
+
+            try {
+                const response = await fetch(`${API_URL}/eventos/create.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    successMsg.textContent = '¡Evento creado exitosamente!';
+                    successMsg.classList.remove('hidden');
+                    showToast('Evento creado exitosamente', 'success');
+                    setTimeout(() => redirect('eventos.html'), 2000);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                errorMsg.textContent = error.message;
+                errorMsg.classList.remove('hidden');
+                showToast(error.message, 'error');
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', logout);
+    </script>
+</body>
+</html>

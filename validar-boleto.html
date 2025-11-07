@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>📅</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validar Boleto - EventSphere</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-indigo-600">EventSphere</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="eventos.html" class="text-gray-700 hover:text-indigo-600">Explorar</a>
+                    <button id="btn-logout" class="text-red-600 hover:text-red-700">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Validador de Boletos -->
+    <div class="max-w-3xl mx-auto px-4 py-12">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="text-center mb-8">
+                <div class="text-6xl mb-4">🎫</div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Validar Boleto</h1>
+                <p class="text-gray-600">Escanea el código QR o ingresa el código manualmente</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <button id="btn-qr-tab" class="tab-button active px-6 py-2 font-semibold rounded-lg">
+                    📷 Escanear QR
+                </button>
+                <button id="btn-codigo-tab" class="tab-button px-6 py-2 font-semibold rounded-lg">
+                    ⌨️ Ingresar Código
+                </button>
+            </div>
+
+            <!-- Escanear QR -->
+            <div id="qr-scanner" class="text-center">
+                <div class="bg-gray-100 rounded-xl p-12 mb-6">
+                    <div class="text-4xl mb-4">📸</div>
+                    <p class="text-gray-600 mb-4">Coloca el código QR frente a la cámara</p>
+                    <button id="btn-activar-camara" class="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700">
+                        Activar Cámara
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ingresar Código -->
+            <div id="codigo-manual" class="hidden">
+                <form id="form-validar" class="space-y-6">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Código del Boleto</label>
+                        <input type="text" id="codigo-input" placeholder="EVT-2025-ABC123" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-center text-lg font-mono">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700">
+                        Validar Boleto
+                    </button>
+                </form>
+            </div>
+
+            <!-- Resultado -->
+            <div id="resultado" class="hidden mt-8">
+                <div id="resultado-valido" class="hidden bg-green-100 border-2 border-green-500 rounded-xl p-6 text-center">
+                    <div class="text-6xl mb-4">✅</div>
+                    <h3 class="text-2xl font-bold text-green-800 mb-4">Boleto Válido</h3>
+                    <div class="bg-white rounded-lg p-4 text-left space-y-2">
+                        <div>
+                            <p class="text-sm text-gray-500">Código</p>
+                            <p id="val-codigo" class="font-mono font-bold"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Titular</p>
+                            <p id="val-usuario" class="font-semibold"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Evento</p>
+                            <p id="val-evento" class="font-semibold"></p>
+                        </div>
+                    </div>
+                    <button onclick="marcarUsado()" class="w-full mt-4 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
+                        Marcar como Usado
+                    </button>
+                </div>
+
+                <div id="resultado-invalido" class="hidden bg-red-100 border-2 border-red-500 rounded-xl p-6 text-center">
+                    <div class="text-6xl mb-4">❌</div>
+                    <h3 class="text-2xl font-bold text-red-800 mb-2">Boleto Inválido</h3>
+                    <p id="error-message" class="text-red-600"></p>
+                    <button onclick="resetear()" class="w-full mt-4 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700">
+                        Validar Otro
+                    </button>
+                </div>
+
+                <div id="resultado-usado" class="hidden bg-yellow-100 border-2 border-yellow-500 rounded-xl p-6 text-center">
+                    <div class="text-6xl mb-4">⚠️</div>
+                    <h3 class="text-2xl font-bold text-yellow-800 mb-2">Boleto Ya Usado</h3>
+                    <div class="bg-white rounded-lg p-4 text-left space-y-2">
+                        <div>
+                            <p class="text-sm text-gray-500">Usado el</p>
+                            <p id="usado-fecha" class="font-semibold"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Validado por</p>
+                            <p id="usado-por" class="font-semibold"></p>
+                        </div>
+                    </div>
+                    <button onclick="resetear()" class="w-full mt-4 bg-yellow-600 text-white py-3 rounded-lg font-semibold hover:bg-yellow-700">
+                        Validar Otro
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        verificarAuth();
+
+        // Tabs
+        const btnQrTab = document.getElementById('btn-qr-tab');
+        const btnCodigoTab = document.getElementById('btn-codigo-tab');
+        const qrScanner = document.getElementById('qr-scanner');
+        const codigoManual = document.getElementById('codigo-manual');
+
+        btnQrTab.addEventListener('click', () => {
+            btnQrTab.classList.add('active');
+            btnCodigoTab.classList.remove('active');
+            qrScanner.classList.remove('hidden');
+            codigoManual.classList.add('hidden');
+        });
+
+        btnCodigoTab.addEventListener('click', () => {
+            btnCodigoTab.classList.add('active');
+            btnQrTab.classList.remove('active');
+            codigoManual.classList.remove('hidden');
+            qrScanner.classList.add('hidden');
+        });
+
+        // Validar boleto
+        document.getElementById('form-validar').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const codigo = document.getElementById('codigo-input').value.trim();
+            await validarBoleto(codigo);
+        });
+
+        async function validarBoleto(codigo) {
+            try {
+                const response = await fetch(`${API_URL}/boletos/validar.php`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ codigo })
+                });
+
+                const data = await response.json();
+                mostrarResultado(data);
+            } catch (error) {
+                showToast('Error validando boleto', 'error');
+            }
+        }
+
+        // 🔹 ACTUALIZADA
+        function mostrarResultado(data) {
+            document.getElementById('resultado').classList.remove('hidden');
+            boletoActual = data.boleto; // Guardar boleto actual
+
+            if (data.success && data.boleto.estado_boleto === 'activo') {
+                document.getElementById('resultado-valido').classList.remove('hidden');
+                document.getElementById('resultado-invalido').classList.add('hidden');
+                document.getElementById('resultado-usado').classList.add('hidden');
+
+                document.getElementById('val-codigo').textContent = data.boleto.codigo_unico;
+                document.getElementById('val-usuario').textContent = data.boleto.usuario_nombre;
+                document.getElementById('val-evento').textContent = data.boleto.evento_titulo;
+            } else if (data.boleto && data.boleto.estado_boleto === 'usado') {
+                document.getElementById('resultado-usado').classList.remove('hidden');
+                document.getElementById('resultado-valido').classList.add('hidden');
+                document.getElementById('resultado-invalido').classList.add('hidden');
+
+                document.getElementById('usado-fecha').textContent = formatDate(data.boleto.fecha_validacion);
+                document.getElementById('usado-por').textContent = data.boleto.validado_por || 'Sistema';
+            } else {
+                document.getElementById('resultado-invalido').classList.remove('hidden');
+                document.getElementById('resultado-valido').classList.add('hidden');
+                document.getElementById('resultado-usado').classList.add('hidden');
+
+                document.getElementById('error-message').textContent = data.message || 'Código no encontrado';
+            }
+        }
+
+        // 🔹 ACTUALIZADA
+        let boletoActual = null;
+
+        window.marcarUsado = async () => {
+            if (!boletoActual) return;
+            
+            const usuario = getUsuarioActual();
+            
+            try {
+                const response = await fetch(`${API_URL}/boletos/validar.php`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ 
+                        codigo: boletoActual.codigo_unico,
+                        accion: 'marcar_usado',
+                        validador_id: usuario.id
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('✅ Boleto marcado como usado exitosamente', 'success');
+                    setTimeout(() => resetear(), 2000);
+                } else {
+                    showToast('❌ ' + data.message, 'error');
+                }
+            } catch (error) {
+                showToast('Error al marcar boleto', 'error');
+            }
+        };
+
+        window.resetear = () => {
+            document.getElementById('resultado').classList.add('hidden');
+            document.getElementById('codigo-input').value = '';
+        };
+
+        document.getElementById('btn-activar-camara').addEventListener('click', () => {
+            showToast('Función de cámara próximamente', 'info');
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', logout);
+    </script>
+</body>
+</html>

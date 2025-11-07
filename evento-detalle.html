@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>📅</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Evento - EventSphere</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .tab-active {
+            border-bottom: 3px solid #4F46E5;
+            color: #4F46E5;
+            font-weight: bold;
+        }
+        .star {
+            cursor: pointer;
+            font-size: 2rem;
+            color: #D1D5DB;
+            transition: color 0.2s;
+        }
+        .star.active, .star:hover {
+            color: #FCD34D;
+        }
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+        }
+        .chat-message {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-indigo-600">📅 EventSphere</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="eventos.html" class="text-gray-700 hover:text-indigo-600">Explorar</a>
+                    <a href="mis-boletos.html" class="text-gray-700 hover:text-indigo-600">Mis Boletos</a>
+                    <button id="btn-logout" class="text-red-600 hover:text-red-700">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <p class="mt-4 text-gray-600">Cargando evento...</p>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <div id="main-content" class="hidden max-w-7xl mx-auto px-4 py-8">
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Columna Principal -->
+            <div class="lg:col-span-2">
+                <!-- Banner del Evento -->
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
+                    <img id="evento-imagen" src="" alt="" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <span id="evento-categoria" class="badge bg-indigo-100 text-indigo-600 text-sm"></span>
+                        <h1 id="evento-titulo" class="text-3xl font-bold text-gray-800 mt-3"></h1>
+                        <p id="evento-descripcion" class="text-gray-600 mt-4"></p>
+                        
+                        <div class="grid md:grid-cols-2 gap-4 mt-6">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-2xl">📅</span>
+                                <div>
+                                    <p class="font-semibold text-gray-700">Fecha y Hora</p>
+                                    <p id="evento-fecha" class="text-sm text-gray-600"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-2xl">📍</span>
+                                <div>
+                                    <p class="font-semibold text-gray-700">Ubicación</p>
+                                    <p id="evento-ubicacion" class="text-sm text-gray-600"></p>
+                                    <p id="evento-direccion" class="text-xs text-gray-500"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pestañas de Interacción (Solo si tiene boleto) -->
+                <div id="tabs-section" class="hidden bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <!-- Navegación de Pestañas -->
+                    <div class="flex border-b border-gray-200">
+                        <button class="tab-btn tab-active flex-1 py-4 text-center" data-tab="resenas">
+                            ⭐ Reseñas
+                        </button>
+                        <button class="tab-btn flex-1 py-4 text-center" data-tab="chat">
+                            💬 Chat
+                        </button>
+                        <button class="tab-btn flex-1 py-4 text-center" data-tab="fotos">
+                            📸 Fotos
+                        </button>
+                    </div>
+
+                    <!-- Contenido de las Pestañas -->
+                    <div class="p-6">
+                        <!-- TAB: Reseñas -->
+                        <div id="tab-resenas" class="tab-content">
+                            <div class="mb-6">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">Calificación Promedio</h3>
+                                <div class="flex items-center space-x-2">
+                                    <span id="promedio-calificacion" class="text-4xl font-bold text-indigo-600">0.0</span>
+                                    <div>
+                                        <div id="estrellas-promedio" class="flex"></div>
+                                        <p id="total-resenas" class="text-sm text-gray-500">0 reseñas</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Formulario de Reseña -->
+                            <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                                <h4 class="font-bold text-gray-800 mb-4">✍️ Dejar una Reseña</h4>
+                                <form id="form-resena">
+                                    <div class="mb-4">
+                                        <label class="block text-gray-700 font-medium mb-2">Calificación</label>
+                                        <div id="rating-stars" class="flex space-x-1">
+                                            <span class="star" data-rating="1">★</span>
+                                            <span class="star" data-rating="2">★</span>
+                                            <span class="star" data-rating="3">★</span>
+                                            <span class="star" data-rating="4">★</span>
+                                            <span class="star" data-rating="5">★</span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-gray-700 font-medium mb-2">Comentario (opcional)</label>
+                                        <textarea id="comentario-resena" rows="3" 
+                                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                                  placeholder="Comparte tu experiencia..."></textarea>
+                                    </div>
+                                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
+                                        📝 Publicar Reseña
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Lista de Reseñas -->
+                            <div id="lista-resenas" class="space-y-4"></div>
+                        </div>
+
+                        <!-- TAB: Chat -->
+                        <div id="tab-chat" class="tab-content hidden">
+                            <div class="chat-container bg-gray-50 rounded-lg p-4 mb-4" id="chat-mensajes"></div>
+                            <form id="form-chat" class="flex space-x-2">
+                                <input type="text" id="mensaje-chat" placeholder="Escribe un mensaje..." 
+                                       class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
+                                    Enviar
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- TAB: Fotos -->
+                        <div id="tab-fotos" class="tab-content hidden">
+                            <!-- Formulario para Subir Foto -->
+                            <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                                <h4 class="font-bold text-gray-800 mb-4">📤 Subir Foto</h4>
+                                <form id="form-foto" enctype="multipart/form-data">
+                                    <div class="mb-4">
+                                        <input type="file" id="input-foto" accept="image/*" 
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                    </div>
+                                    <div class="mb-4">
+                                        <input type="text" id="descripcion-foto" placeholder="Descripción (opcional)" 
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                    </div>
+                                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
+                                        📷 Subir Foto
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Galería de Fotos -->
+                            <div id="galeria-fotos" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar de Información -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-xl p-6 sticky top-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Información</h3>
+                    
+                    <div class="mb-4">
+                        <p class="text-gray-600 text-sm mb-1">📅 Fecha:</p>
+                        <p id="info-fecha" class="font-semibold text-gray-800"></p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-gray-600 text-sm mb-1">📍 Lugar:</p>
+                        <p id="info-lugar" class="font-semibold text-gray-800"></p>
+                        <p id="info-direccion" class="text-sm text-gray-600"></p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-gray-600 text-sm mb-1">💵 Precio:</p>
+                        <p id="info-precio" class="text-3xl font-bold text-indigo-600"></p>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <p class="text-gray-600 text-sm mb-1">🎟️ Disponibilidad:</p>
+                        <p id="info-disponibles" class="font-semibold text-gray-800"></p>
+                    </div>
+                    
+                    <div id="boton-accion"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Compra -->
+    <div id="modal-compra" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Comprar Boleto</h3>
+            <form id="form-compra" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Cantidad de Boletos</label>
+                    <input type="number" id="cantidad" min="1" max="10" value="1"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Método de Pago</label>
+                    <select id="metodo-pago"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        <option value="tarjeta">💳 Tarjeta de Crédito</option>
+                        <option value="paypal">📧 PayPal</option>
+                    </select>
+                </div>
+                <div id="datos-tarjeta">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2">Número de Tarjeta</label>
+                        <input type="text" id="numero-tarjeta" placeholder="1234-5678-9012-3456"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Vencimiento</label>
+                            <input type="text" id="vencimiento" placeholder="MM/YY"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">CVV</label>
+                            <input type="text" id="cvv" placeholder="123" maxlength="4"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+                </div>
+                <div id="datos-paypal" class="hidden">
+                    <label class="block text-gray-700 font-medium mb-2">Email de PayPal</label>
+                    <input type="email" id="email-paypal" placeholder="tu@email.com"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">Precio por boleto:</span>
+                        <span id="precio-unitario" class="font-semibold">$0.00</span>
+                    </div>
+                    <div class="flex justify-between text-xl font-bold">
+                        <span>Total:</span>
+                        <span id="precio-total" class="text-indigo-600">$0.00</span>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700">
+                        Confirmar Compra
+                    </button>
+                    <button type="button" id="btn-cancelar" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/eventos.js"></script>
+    <script src="js/evento-detalle.js"></script>
+</body>
+</html>

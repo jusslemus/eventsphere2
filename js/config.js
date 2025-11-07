@@ -1,7 +1,7 @@
 // EventSphere - Configuración Global
 
 // URL base de la API (CAMBIAR según tu servidor)
-const API_URL = 'http://localhost:8080/api';
+const API_URL = '/eventsphere2/api';
 
 // Configuración de headers para las peticiones
 const getHeaders = () => {

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>📅</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunidad - EventSphere</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-indigo-600">EventSphere</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="eventos.html" class="text-gray-700 hover:text-indigo-600">Explorar</a>
+                    <button id="btn-logout" class="text-red-600 hover:text-red-700">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Chat Comunidad -->
+    <div class="max-w-5xl mx-auto px-4 py-12">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-6">
+                <h1 id="evento-titulo" class="text-2xl font-bold mb-2">Comunidad del Evento</h1>
+                <p class="opacity-90">💬 <span id="miembros-count">0</span> miembros conectados</p>
+            </div>
+
+            <!-- Mensajes -->
+            <div id="mensajes-container" class="h-96 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                <div class="text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">💬</div>
+                    <p>Cargando mensajes...</p>
+                </div>
+            </div>
+
+            <!-- Input Mensaje -->
+            <div class="border-t p-4">
+                <form id="form-mensaje" class="flex space-x-4">
+                    <input type="text" id="mensaje-input" placeholder="Escribe un mensaje..." required
+                           class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" class="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 font-semibold">
+                        Enviar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Galería de Fotos -->
+        <div class="mt-8 bg-white rounded-2xl shadow-xl p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">📸 Galería del Evento</h2>
+                <button id="btn-subir-foto" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
+                    Subir Foto
+                </button>
+            </div>
+
+            <div id="galeria-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="col-span-full text-center text-gray-500 py-8">
+                    <div class="text-4xl mb-2">🖼️</div>
+                    <p>No hay fotos todavía. ¡Sé el primero en compartir!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Subir Foto -->
+    <div id="modal-foto" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Subir Foto</h3>
+            
+            <form id="form-foto" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Seleccionar Imagen</label>
+                    <input type="file" id="foto-input" accept="image/*" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Descripción (opcional)</label>
+                    <textarea id="foto-descripcion" rows="3"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                              placeholder="Describe tu foto..."></textarea>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700">
+                        Subir
+                    </button>
+                    <button type="button" id="btn-cancelar-foto" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        verificarAuth();
+
+        const usuario = getUsuarioActual();
+        const eventoId = getUrlParameter('evento');
+
+        if (!eventoId) {
+            redirect('eventos.html');
+        }
+
+        // Cargar información de la comunidad
+        (async () => {
+            try {
+                const response = await fetch(`${API_URL}/comunidades/info.php?evento=${eventoId}`, {
+                    headers: getHeaders()
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('evento-titulo').textContent = `Comunidad: ${data.evento.titulo}`;
+                    document.getElementById('miembros-count').textContent = data.miembros_count || 0;
+                }
+            } catch (error) {
+                console.error('Error cargando comunidad:', error);
+            }
+        })();
+
+        // Cargar mensajes
+        const cargarMensajes = async () => {
+            try {
+                const response = await fetch(`${API_URL}/comunidades/mensajes.php?evento=${eventoId}`, {
+                    headers: getHeaders()
+                });
+                const data = await response.json();
+                
+                if (data.success && data.mensajes.length > 0) {
+                    renderMensajes(data.mensajes);
+                } else {
+                    document.getElementById('mensajes-container').innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            <div class="text-4xl mb-2">💬</div>
+                            <p>No hay mensajes. ¡Inicia la conversación!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error cargando mensajes:', error);
+            }
+        };
+
+        function renderMensajes(mensajes) {
+            const container = document.getElementById('mensajes-container');
+            container.innerHTML = mensajes.map(msg => {
+                const esMio = msg.usuario_id === usuario.id;
+                return `
+                    <div class="flex ${esMio ? 'justify-end' : 'justify-start'}">
+                        <div class="max-w-xs lg:max-w-md">
+                            ${!esMio ? `<p class="text-xs text-gray-500 mb-1">${msg.usuario_nombre}</p>` : ''}
+                            <div class="${esMio ? 'bg-indigo-600 text-white' : 'bg-white border border-gray-300'} rounded-lg px-4 py-2">
+                                <p>${msg.mensaje}</p>
+                                <p class="text-xs ${esMio ? 'text-indigo-200' : 'text-gray-400'} mt-1">
+                                    ${new Date(msg.fecha_envio).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Enviar mensaje
+        document.getElementById('form-mensaje').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const mensaje = document.getElementById('mensaje-input').value.trim();
+            
+            if (!mensaje) return;
+
+            try {
+                const response = await fetch(`${API_URL}/comunidades/enviar.php`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        evento_id: eventoId,
+                        mensaje: mensaje
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('mensaje-input').value = '';
+                    cargarMensajes();
+                }
+            } catch (error) {
+                showToast('Error enviando mensaje', 'error');
+            }
+        });
+
+        // Subir foto
+        document.getElementById('btn-subir-foto').addEventListener('click', () => {
+            document.getElementById('modal-foto').classList.remove('hidden');
+        });
+
+        document.getElementById('btn-cancelar-foto').addEventListener('click', () => {
+            document.getElementById('modal-foto').classList.add('hidden');
+        });
+
+        document.getElementById('form-foto').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showToast('Foto subida exitosamente', 'success');
+            document.getElementById('modal-foto').classList.add('hidden');
+            document.getElementById('form-foto').reset();
+        });
+
+        // Cargar mensajes cada 5 segundos
+        cargarMensajes();
+        setInterval(cargarMensajes, 5000);
+
+        document.getElementById('btn-logout').addEventListener('click', logout);
+    </script>
+</body>
+</html>

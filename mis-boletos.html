@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>📅</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Boletos - EventSphere</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Librería QRCode.js para generar códigos QR -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 50%, #4a7bb7 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(74, 144, 226, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(94, 114, 228, 0.3) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            font-weight: 700;
+        }
+
+        .boleto-card {
+            background: white;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(30, 58, 95, 0.1);
+        }
+
+        .boleto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .boleto-header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .boleto-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-20px, -20px); }
+        }
+
+        .btn-ver-boleto {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(30, 58, 95, 0.3);
+        }
+
+        .btn-ver-boleto:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 58, 95, 0.4);
+        }
+
+        .empty-state {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .empty-state-link {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            box-shadow: 0 4px 15px rgba(30, 58, 95, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .empty-state-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 58, 95, 0.4);
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: modalSlideUp 0.3s ease-out;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .qr-card {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qr-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .btn-mostrar-qr {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            box-shadow: 0 4px 15px rgba(30, 58, 95, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-mostrar-qr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 58, 95, 0.4);
+        }
+
+        .btn-cerrar {
+            background: rgba(30, 58, 95, 0.1);
+            color: #1e3a5f;
+            border: 2px solid rgba(30, 58, 95, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-cerrar:hover {
+            background: rgba(30, 58, 95, 0.15);
+            border-color: rgba(30, 58, 95, 0.3);
+        }
+
+        .loading-spinner {
+            border-color: rgba(30, 58, 95, 0.2);
+            border-top-color: #1e3a5f;
+        }
+
+        .nav-link {
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #1e3a5f;
+        }
+
+        .nav-link.active {
+            color: #1e3a5f;
+            font-weight: 600;
+        }
+
+        .nav-btn-crear {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            box-shadow: 0 2px 10px rgba(30, 58, 95, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn-crear:hover {
+            box-shadow: 0 4px 15px rgba(30, 58, 95, 0.4);
+        }
+
+        .logout-btn {
+            color: #dc2626;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            color: #991b1b;
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .badge-valido {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .badge-usado {
+            color: #ef4444;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold logo">EventSphere</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="eventos.html" class="nav-link">Explorar</a>
+                    <a href="mis-boletos.html" class="nav-link active">Mis Boletos</a>
+                    <a href="crear-evento.html" class="nav-btn-crear text-white px-6 py-2 rounded-lg">Crear Evento</a>
+                    <button id="btn-logout" class="logout-btn">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mis Boletos -->
+    <div class="max-w-7xl mx-auto px-4 py-12 main-container">
+        <h1 class="text-3xl font-bold mb-8">Mis Boletos</h1>
+
+        <div id="boletos-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Boletos se cargan aquí -->
+        </div>
+
+        <div id="loading" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 loading-spinner"></div>
+            <p class="mt-4 text-white font-semibold">Cargando boletos...</p>
+        </div>
+
+        <div id="no-boletos" class="hidden text-center py-12">
+            <div class="empty-state p-12">
+                <div class="text-6xl mb-4">🎫</div>
+                <p class="text-gray-500 text-lg mb-4">No tienes boletos todavía</p>
+                <a href="eventos.html" class="empty-state-link text-white px-8 py-3 rounded-lg inline-block">
+                    Explorar Eventos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Boleto -->
+    <div id="modal-boleto" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="modal-content p-8 max-w-md w-full mx-4">
+            <div class="text-center">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Tu Boleto Digital</h3>
+
+                <div class="qr-card text-white rounded-xl p-6 mb-6">
+                    <div id="qr-container" class="bg-white p-4 rounded-lg mb-4 flex items-center justify-center min-h-[200px] relative z-10">
+                        <div id="qr-placeholder" class="text-8xl">🎫</div>
+                        <div id="qrcode" class="hidden"></div>
+                    </div>
+
+                    <div class="space-y-2 text-left relative z-10">
+                        <p class="text-sm opacity-90">Código de Boleto</p>
+                        <p id="codigo-boleto" class="text-2xl font-bold font-mono">EVT-2025-ABC123</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left space-y-2">
+                    <div>
+                        <p class="text-xs text-gray-500">Evento</p>
+                        <p id="evento-nombre" class="font-semibold"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Fecha</p>
+                        <p id="evento-fecha" class="font-semibold"></p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Ubicación</p>
+                        <p id="evento-ubicacion" class="font-semibold"></p>
+                    </div>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button id="btn-mostrar-qr" class="flex-1 btn-mostrar-qr text-white py-3 rounded-lg font-semibold">
+                       📱 Mostrar QR
+                    </button>
+                    <button id="btn-cerrar-modal" class="flex-1 btn-cerrar py-3 rounded-lg font-semibold">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        verificarAuth();
+
+        const usuario = getUsuarioActual();
+        let qrCodeInstance = null;
+
+        // Cargar boletos del usuario - SIN DUPLICACIÓN
+        (async () => {
+            const loading = document.getElementById('loading');
+            const container = document.getElementById('boletos-container');
+            const noBoletos = document.getElementById('no-boletos');
+
+            try {
+                const response = await fetch(`${API_URL}/boletos/mis-boletos.php?usuario_id=${usuario.id}`, {
+                    headers: getHeaders()
+                });
+
+                const data = await response.json();
+                loading.classList.add('hidden');
+
+                if (data.success && data.boletos.length > 0) {
+                    container.classList.remove('hidden');
+                    renderBoletos(data.boletos, container);
+                    // NO MOSTRAR mensaje "no tienes boletos"
+                } else {
+                    container.classList.add('hidden');
+                    noBoletos.classList.remove('hidden');
+                }
+            } catch (error) {
+                loading.classList.add('hidden');
+                container.classList.add('hidden');
+                noBoletos.classList.remove('hidden');
+                console.error('Error cargando boletos:', error);
+            }
+        })();
+
+        function renderBoletos(boletos, container) {
+            container.innerHTML = boletos.map(boleto => `
+                <div class="boleto-card rounded-xl shadow-lg overflow-hidden">
+                    <div class="boleto-header p-4 relative">
+                        <div class="text-white relative z-10">
+                            <p class="text-sm opacity-90">Código</p>
+                            <p class="font-mono font-bold">${boleto.codigo_unico}</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">${boleto.evento_titulo}</h3>
+                        <div class="space-y-2 text-sm text-gray-600 mb-4">
+                            <p>📅 ${formatDate(boleto.fecha_evento)}</p>
+                            <p>📍 ${boleto.ubicacion}</p>
+                            <p class="font-semibold ${boleto.estado_boleto === 'activo' ? 'badge-valido' : 'badge-usado'}">
+                                ${boleto.estado_boleto === 'activo' ? '✅ Válido' : '❌ Usado'}
+                            </p>
+                        </div>
+                        <button onclick="verBoleto('${boleto.codigo_unico}', '${boleto.evento_titulo}', '${boleto.fecha_evento}', '${boleto.ubicacion}')"
+                                class="w-full btn-ver-boleto text-white py-2 rounded-lg transition">
+                            Ver Boleto
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.verBoleto = (codigo, evento, fecha, ubicacion) => {
+            document.getElementById('codigo-boleto').textContent = codigo;
+            document.getElementById('evento-nombre').textContent = evento;
+            document.getElementById('evento-fecha').textContent = formatDate(fecha);
+            document.getElementById('evento-ubicacion').textContent = ubicacion;
+
+            // Resetear QR al abrir modal
+            document.getElementById('qr-placeholder').classList.remove('hidden');
+            document.getElementById('qrcode').classList.add('hidden');
+            document.getElementById('qrcode').innerHTML = '';
+            qrCodeInstance = null;
+
+            document.getElementById('modal-boleto').classList.remove('hidden');
+        };
+
+        document.getElementById('btn-cerrar-modal').addEventListener('click', () => {
+            document.getElementById('modal-boleto').classList.add('hidden');
+            // Resetear QR al cerrar
+            document.getElementById('qr-placeholder').classList.remove('hidden');
+            document.getElementById('qrcode').classList.add('hidden');
+            document.getElementById('qrcode').innerHTML = '';
+            qrCodeInstance = null;
+        });
+
+        // BOTÓN MOSTRAR QR - AHORA FUNCIONA
+        document.getElementById('btn-mostrar-qr').addEventListener('click', () => {
+            const codigo = document.getElementById('codigo-boleto').textContent;
+            const qrContainer = document.getElementById('qrcode');
+            const placeholder = document.getElementById('qr-placeholder');
+
+            // Si ya existe el QR, no generarlo de nuevo
+            if (qrCodeInstance) {
+                showToast('✅ Código QR ya visible', 'info');
+                return;
+            }
+
+            try {
+                // Ocultar placeholder y mostrar contenedor QR
+                placeholder.classList.add('hidden');
+                qrContainer.classList.remove('hidden');
+                qrContainer.innerHTML = ''; // Limpiar contenedor
+
+                // Generar código QR con el código del boleto
+                qrCodeInstance = new QRCode(qrContainer, {
+                    text: codigo,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#1e3a5f",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                showToast('✅ Código QR generado correctamente', 'success');
+            } catch (error) {
+                console.error('Error generando QR:', error);
+                showToast('❌ Error generando código QR', 'error');
+                placeholder.classList.remove('hidden');
+                qrContainer.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', logout);
+    </script>
+</body>
+</html>
