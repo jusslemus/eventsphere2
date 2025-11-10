@@ -1,7 +1,9 @@
 // EventSphere - Configuración Global
 
-// URL base de la API (CAMBIAR según tu servidor)
-const API_URL = '/eventsphere2/api';
+// URL base de la API
+const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:8000'  // PHP server en puerto 8000
+    : 'https://kathyap.ddns.net/eventsphere2/api';  // ✅ Tu dominio con SSL
 
 // Configuración de headers para las peticiones
 const getHeaders = () => {

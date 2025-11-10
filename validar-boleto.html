@@ -7,6 +7,8 @@
     <title>Validar Boleto - EventSphere</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
+    <!-- Librería para escanear QR -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body class="bg-gray-50">
     <!-- Navbar -->
@@ -45,12 +47,24 @@
 
             <!-- Escanear QR -->
             <div id="qr-scanner" class="text-center">
-                <div class="bg-gray-100 rounded-xl p-12 mb-6">
+                <!-- Área de la cámara -->
+                <div id="reader" class="mx-auto mb-6 hidden"></div>
+                
+                <!-- Botón para activar -->
+                <div id="qr-instructions" class="bg-gray-100 rounded-xl p-12 mb-6">
                     <div class="text-4xl mb-4">📸</div>
                     <p class="text-gray-600 mb-4">Coloca el código QR frente a la cámara</p>
-                    <button id="btn-activar-camara" class="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700">
-                        Activar Cámara
+                    <button id="btn-activar-camara" class="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition">
+                        🎥 Activar Cámara
                     </button>
+                </div>
+
+                <!-- Controles cuando está activa -->
+                <div id="qr-controls" class="hidden space-y-4">
+                    <button id="btn-detener-camara" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
+                        ⏹️ Detener Cámara
+                    </button>
+                    <p class="text-sm text-gray-500">Escanea el código QR del boleto</p>
                 </div>
             </div>
 
@@ -235,8 +249,89 @@
             document.getElementById('codigo-input').value = '';
         };
 
-        document.getElementById('btn-activar-camara').addEventListener('click', () => {
-            showToast('Función de cámara próximamente', 'info');
+        // 📷 ESCÁNER QR CON CÁMARA
+        let html5QrCode = null;
+        let escanerActivo = false;
+
+        document.getElementById('btn-activar-camara').addEventListener('click', async () => {
+            try {
+                // Inicializar escáner
+                html5QrCode = new Html5Qrcode("reader");
+                
+                // Mostrar cámara y ocultar instrucciones
+                document.getElementById('reader').classList.remove('hidden');
+                document.getElementById('qr-instructions').classList.add('hidden');
+                document.getElementById('qr-controls').classList.remove('hidden');
+                
+                // Configuración del escáner
+                const config = {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0
+                };
+                
+                // Iniciar escaneo
+                await html5QrCode.start(
+                    { facingMode: "environment" }, // Cámara trasera en móviles
+                    config,
+                    (decodedText, decodedResult) => {
+                        // QR detectado exitosamente
+                        console.log(`QR escaneado: ${decodedText}`);
+                        
+                        // Detener cámara
+                        detenerCamara();
+                        
+                        // Validar el código
+                        validarBoleto(decodedText);
+                        
+                        // Mostrar toast
+                        showToast('✅ QR escaneado correctamente', 'success');
+                    },
+                    (errorMessage) => {
+                        // Error al escanear (normal mientras busca)
+                        // No mostramos nada para no saturar
+                    }
+                );
+                
+                escanerActivo = true;
+                showToast('📸 Cámara activada', 'success');
+                
+            } catch (err) {
+                console.error('Error al iniciar cámara:', err);
+                showToast('❌ No se pudo acceder a la cámara. Verifica los permisos.', 'error');
+                
+                // Restaurar vista
+                document.getElementById('reader').classList.add('hidden');
+                document.getElementById('qr-instructions').classList.remove('hidden');
+                document.getElementById('qr-controls').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('btn-detener-camara').addEventListener('click', () => {
+            detenerCamara();
+        });
+
+        async function detenerCamara() {
+            if (html5QrCode && escanerActivo) {
+                try {
+                    await html5QrCode.stop();
+                    escanerActivo = false;
+                    
+                    // Restaurar vista
+                    document.getElementById('reader').classList.add('hidden');
+                    document.getElementById('qr-instructions').classList.remove('hidden');
+                    document.getElementById('qr-controls').classList.add('hidden');
+                    
+                    showToast('⏹️ Cámara detenida', 'info');
+                } catch (err) {
+                    console.error('Error al detener cámara:', err);
+                }
+            }
+        }
+
+        // Detener cámara al cambiar de tab
+        btnCodigoTab.addEventListener('click', () => {
+            detenerCamara();
         });
 
         document.getElementById('btn-logout').addEventListener('click', logout);

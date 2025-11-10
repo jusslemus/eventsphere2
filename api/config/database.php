@@ -4,8 +4,8 @@
 class Database {
     private $host = "localhost";
     private $db_name = "eventsphere_db";
-    private $username = "eventsphere_user";
-    private $password = "juss07lems.";
+    private $username = "root";
+    private $password = "";  // XAMPP por defecto no tiene password para root
     private $charset = "utf8mb4";
     public $conn;
 
@@ -32,17 +32,5 @@ class Database {
 
         return $this->conn;
     }
-}
-
-// Headers CORS
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Content-Type: application/json; charset=UTF-8');
-
-// Manejar preflight OPTIONS
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
 }
 ?>

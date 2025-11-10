@@ -101,15 +101,15 @@ elseif ($method === 'POST') {
 
         if (move_uploaded_file($file['tmp_name'], $upload_path)) {
             // Guardar en BD
-            $ruta_foto = 'fotos/' . $new_filename;
+            $ruta_archivo = 'fotos/' . $new_filename;
             
-            $query = "INSERT INTO fotos_evento (evento_id, usuario_id, ruta_foto, descripcion) 
-                      VALUES (:evento_id, :usuario_id, :ruta_foto, :descripcion)";
+            $query = "INSERT INTO fotos_evento (evento_id, usuario_id, ruta_archivo, descripcion) 
+                      VALUES (:evento_id, :usuario_id, :ruta_archivo, :descripcion)";
             
             $stmt = $db->prepare($query);
             $stmt->bindParam(':evento_id', $evento_id);
             $stmt->bindParam(':usuario_id', $usuario_id);
-            $stmt->bindParam(':ruta_foto', $ruta_foto);
+            $stmt->bindParam(':ruta_archivo', $ruta_archivo);
             $stmt->bindParam(':descripcion', $descripcion);
             
             if ($stmt->execute()) {
@@ -117,7 +117,7 @@ elseif ($method === 'POST') {
                 echo json_encode([
                     'success' => true,
                     'message' => 'Foto subida exitosamente',
-                    'ruta' => $ruta_foto
+                    'ruta' => $ruta_archivo
                 ]);
             }
         } else {

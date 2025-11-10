@@ -213,16 +213,77 @@
             document.getElementById('modal-foto').classList.add('hidden');
         });
 
-        document.getElementById('form-foto').addEventListener('submit', (e) => {
+        // Cargar fotos
+        const cargarFotos = async () => {
+            try {
+                const response = await fetch(`${API_URL}/fotos/index.php?evento_id=${eventoId}`);
+                const data = await response.json();
+                
+                if (data.success && data.fotos.length > 0) {
+                    renderFotos(data.fotos);
+                } else {
+                    document.getElementById('galeria-container').innerHTML = `
+                        <div class="col-span-full text-center text-gray-500 py-8">
+                            <div class="text-4xl mb-2">🖼️</div>
+                            <p>No hay fotos todavía. ¡Sé el primero en compartir!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error cargando fotos:', error);
+            }
+        };
+
+        function renderFotos(fotos) {
+            const container = document.getElementById('galeria-container');
+            container.innerHTML = fotos.map(foto => `
+                <div class="relative group overflow-hidden rounded-lg shadow-lg">
+                    <img src="uploads/${foto.ruta_archivo}" 
+                         alt="${foto.descripcion || 'Foto del evento'}"
+                         class="w-full h-48 object-cover transition-transform group-hover:scale-110">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p class="text-white text-sm font-medium">${foto.nombre}</p>
+                        ${foto.descripcion ? `<p class="text-white/80 text-xs">${foto.descripcion}</p>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('form-foto').addEventListener('submit', async (e) => {
             e.preventDefault();
-            showToast('Foto subida exitosamente', 'success');
-            document.getElementById('modal-foto').classList.add('hidden');
-            document.getElementById('form-foto').reset();
+            
+            const formData = new FormData();
+            formData.append('foto', document.getElementById('foto-input').files[0]);
+            formData.append('evento_id', eventoId);
+            formData.append('usuario_id', usuario.id);
+            formData.append('descripcion', document.getElementById('foto-descripcion').value);
+
+            try {
+                const response = await fetch(`${API_URL}/fotos/index.php`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('Foto subida exitosamente', 'success');
+                    document.getElementById('modal-foto').classList.add('hidden');
+                    document.getElementById('form-foto').reset();
+                    cargarFotos();
+                } else {
+                    showToast(data.message || 'Error al subir foto', 'error');
+                }
+            } catch (error) {
+                showToast('Error al subir foto', 'error');
+            }
         });
 
         // Cargar mensajes cada 5 segundos
         cargarMensajes();
+        cargarFotos();
         setInterval(cargarMensajes, 5000);
+        setInterval(cargarFotos, 10000);
 
         document.getElementById('btn-logout').addEventListener('click', logout);
     </script>

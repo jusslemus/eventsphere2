@@ -1,6 +1,5 @@
-<?php include_once '../config/cors.php'; ?>
-<?php include_once __DIR__ . '/../config/cors.php'; ?>
 <?php
+require_once '../config/cors.php';
 require_once '../config/database.php';
 
 $database = new Database();
