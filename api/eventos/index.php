@@ -1,6 +1,5 @@
-<?php include_once '../config/cors.php'; ?>
-<?php include_once __DIR__ . '/../config/cors.php'; ?>
 <?php
+require_once '../config/cors.php';
 require_once '../config/database.php';
 
 $database = new Database();
@@ -11,12 +10,12 @@ $categoria = isset($_GET['categoria']) ? $_GET['categoria'] : '';
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 100;
 
 try {
-    $query = "SELECT e.*, c.nombre as categoria, 
+    $query = "SELECT e.*, c.nombre as categoria_nombre, c.id as categoria_id,
               CONCAT(u.nombre, ' ', u.apellido) as organizador
               FROM eventos e
               LEFT JOIN categorias c ON e.categoria_id = c.id
               LEFT JOIN usuarios u ON e.organizador_id = u.id
-              WHERE e.estado = 'activo'";
+              WHERE e.estado_evento = 'activo'";
     
     if (!empty($search)) {
         $query .= " AND (e.titulo LIKE :search OR e.descripcion LIKE :search OR e.ubicacion LIKE :search)";

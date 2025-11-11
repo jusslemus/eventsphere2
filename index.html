@@ -79,6 +79,28 @@
         </div>
     </div>
 
+    <!-- Eventos Destacados -->
+    <div class="bg-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-4xl font-bold text-gray-800 mb-2">🎉 Próximos Eventos</h2>
+                    <p class="text-xl text-gray-600">Descubre las mejores experiencias cerca de ti</p>
+                </div>
+                <a href="eventos.html" class="btn btn-primary">Ver Todos →</a>
+            </div>
+
+            <!-- Grid de Eventos -->
+            <div id="eventos-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Loading -->
+                <div class="col-span-full text-center py-12">
+                    <div class="animate-spin text-5xl mb-4">⏳</div>
+                    <p class="text-gray-500">Cargando eventos...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer-eventsphere">
         <div class="max-w-7xl mx-auto">
@@ -89,10 +111,14 @@
 
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const usuario = getUsuarioActual();
             const navbarMenu = document.getElementById('navbarMenu');
+            
+            // Cargar eventos destacados
+            cargarEventosDestacados();
             
             if (usuario && usuario.id) {
                 navbarMenu.innerHTML = `
@@ -112,6 +138,79 @@
                 `;
             }
         });
+
+        // Función para cargar eventos destacados
+        async function cargarEventosDestacados() {
+            try {
+                const response = await fetch(`${API_URL}/eventos/index.php?limit=6`);
+                const data = await response.json();
+                
+                const eventosGrid = document.getElementById('eventos-grid');
+                
+                if (data.success && data.eventos && data.eventos.length > 0) {
+                    eventosGrid.innerHTML = data.eventos.map(evento => `
+                        <div class="card hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                            <div class="aspect-video bg-gradient-to-br from-indigo-500 to-purple-600 rounded-t-lg flex items-center justify-center text-white text-6xl">
+                                ${getCategoriaIcon(evento.categoria_id)}
+                            </div>
+                            <div class="p-6">
+                                <span class="inline-block px-3 py-1 text-sm font-semibold text-indigo-600 bg-indigo-100 rounded-full mb-3">
+                                    ${evento.categoria_nombre || 'Evento'}
+                                </span>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2">${evento.titulo}</h3>
+                                <p class="text-gray-600 mb-4 line-clamp-2">${evento.descripcion}</p>
+                                <div class="space-y-2 text-sm text-gray-500 mb-4">
+                                    <div class="flex items-center">
+                                        <span class="mr-2">📅</span>
+                                        <span>${formatDate(evento.fecha_evento)}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="mr-2">📍</span>
+                                        <span>${evento.ubicacion}</span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="mr-2">💰</span>
+                                        <span class="font-bold text-indigo-600">${formatPrice(evento.precio_boleto)}</span>
+                                    </div>
+                                </div>
+                                <a href="evento-detalle.html?id=${evento.id}" class="btn btn-primary w-full text-center">
+                                    Ver Detalles →
+                                </a>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    eventosGrid.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <div class="text-6xl mb-4">📅</div>
+                            <p class="text-gray-500 text-xl mb-4">No hay eventos disponibles</p>
+                            <a href="crear-evento.html" class="btn btn-primary">Crear el Primer Evento</a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error cargando eventos:', error);
+                document.getElementById('eventos-grid').innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-6xl mb-4">⚠️</div>
+                        <p class="text-gray-500 text-xl">Error al cargar eventos</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Helper para iconos de categorías
+        function getCategoriaIcon(categoriaId) {
+            const iconos = {
+                1: '🎵',
+                2: '🎤',
+                3: '⚽',
+                4: '🎨',
+                5: '🎉',
+                6: '🍽️'
+            };
+            return iconos[categoriaId] || '🎭';
+        }
     </script>
 </body>
 </html>
